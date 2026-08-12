@@ -1,0 +1,40 @@
+generator client {
+  provider      = "prisma-client"
+  output        = "../src/generated/prisma"
+  binaryTargets = ["native", "debian-openssl-3.0.x", "linux-musl-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id         String   @id @default(uuid())
+  email      String   @unique
+  created_at DateTime @default(now())
+  trips      Trip[]
+}
+
+model Trip {
+  id           String          @id @default(uuid())
+  user_id      String
+  destination  String
+  start_date   DateTime
+  end_date     DateTime
+  total_budget Float
+  status       String          @default("processing") // processing, completed
+  created_at   DateTime        @default(now())
+  user         User            @relation(fields: [user_id], references: [id])
+  items        ItineraryItem[]
+}
+
+model ItineraryItem {
+  id              String   @id @default(uuid())
+  trip_id         String
+  type            String   // flight, hotel, activity
+  cost            Float
+  source_citation String?
+  justification   String?
+  start_time      DateTime?
+  trip            Trip     @relation(fields: [trip_id], references: [id])
+}
